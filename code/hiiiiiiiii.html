@@ -14,8 +14,9 @@
 
     #box {
       position: fixed;
-      top: 0;
-      left: 0;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       width: 120px;
       height: 120px;
       background: red;
@@ -27,11 +28,19 @@
 
   <div id="box"></div>
 
+  <input type="color" id="colorSlider" value="#FF0000" style="position: fixed; bottom: 20px; left: 20px; width: 80px; height: 60px; cursor: pointer;">
+
   <script>
     const box = document.getElementById("box");
+    const colorSlider = document.getElementById("colorSlider");
     let isDragging = false;
     let offsetX = 0;
     let offsetY = 0;
+    let size = 120;
+
+    colorSlider.addEventListener("input", (e) => {
+      box.style.background = e.target.value;
+    });
 
     box.addEventListener("mousedown", (e) => {
       isDragging = true;
@@ -47,6 +56,7 @@
         const newY = e.clientY - offsetY;
         box.style.left = newX + "px";
         box.style.top = newY + "px";
+        box.style.transform = "translate(-50%, -50%)";
       }
     });
 
@@ -55,11 +65,19 @@
       box.style.cursor = "grab";
     });
 
+    document.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      if (e.deltaY < 0) {
+        size += 10; // scroll up = bigger
+      } else {
+        size = Math.max(20, size - 10); // scroll down = smaller (min 20px)
+      }
+      box.style.width = size + "px";
+      box.style.height = size + "px";
+    }, { passive: false });
+
     box.style.cursor = "grab";
   </script>
 
 </body>
 </html>
-
-git push
-

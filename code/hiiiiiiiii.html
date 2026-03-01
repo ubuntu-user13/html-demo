@@ -1,0 +1,86 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Scroll Box</title>
+
+  <style>
+    body {
+      margin: 0;
+      height: 300vh; /* forces scrolling */
+      background: #111;
+    }
+
+    #box {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 120px;
+      height: 120px;
+      background: red;
+      will-change: transform;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="box"></div>
+
+  <input type="color" id="colorSlider" value="#FF0000" style="position: fixed; bottom: 20px; left: 20px; width: 80px; height: 60px; cursor: pointer;">
+
+  <script>
+    const box = document.getElementById("box");
+    const colorSlider = document.getElementById("colorSlider");
+    let isDragging = false;
+    let offsetX = 0;
+    let offsetY = 0;
+    let size = 120;
+
+    colorSlider.addEventListener("input", (e) => {
+      box.style.background = e.target.value;
+    });
+
+    box.addEventListener("mousedown", (e) => {
+      isDragging = true;
+      const rect = box.getBoundingClientRect();
+      // Lock position to pixels now so mousemove doesn't jump from % to px
+      box.style.left = rect.left + "px";
+      box.style.top = rect.top + "px";
+      box.style.transform = "none";
+      offsetX = e.clientX - rect.left;
+      offsetY = e.clientY - rect.top;
+      box.style.cursor = "grabbing";
+    });
+
+    document.addEventListener("mousemove", (e) => {
+      if (isDragging) {
+        const newX = e.clientX - offsetX;
+        const newY = e.clientY - offsetY;
+        box.style.left = newX + "px";
+        box.style.top = newY + "px";
+      }
+    });
+
+    document.addEventListener("mouseup", () => {
+      isDragging = false;
+      box.style.cursor = "grab";
+    });
+
+    document.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      if (e.deltaY < 0) {
+        size += 10; // scroll up = bigger
+      } else {
+        size = Math.max(20, size - 10); // scroll down = smaller (min 20px)
+      }
+      box.style.width = size + "px";
+      box.style.height = size + "px";
+    }, { passive: false });
+
+    box.style.cursor = "grab";
+  </script>
+
+</body>
+</html>

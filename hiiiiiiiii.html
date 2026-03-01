@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,51 +8,80 @@
   <style>
     body {
       margin: 0;
-      height: 300vh; /* forces scrolling */
+      height: 300vh;
       background: #111;
     }
 
     #box {
       position: fixed;
-      top: 0;
-      left: 0;
       width: 120px;
       height: 120px;
       background: red;
-      will-change: transform;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      cursor: grab;
     }
   </style>
 </head>
 <body>
 
-  <div id="box"></div>
+<div id="box"></div>
 
-  <script>
-    const box = document.getElementById("box");
+<input type="color" id="colorSlider"
+  style="position: fixed; bottom: 20px; left: 20px; width: 80px; height: 60px;">
 
-    window.addEventListener("scroll", () => {
-      const scrollY = window.scrollY;
-      const maxScroll =
-        document.body.scrollHeight - window.innerHeight;
+<script>
+  const box = document.getElementById("box");
+  const colorSlider = document.getElementById("colorSlider");
 
-      // normalize scroll (0 → 1)
-      const progress = scrollY / maxScroll;
+  let isDragging = false;
+  let offsetX = 0;
+  let offsetY = 0;
+  let size = 120;
+  let initialized = false;
 
-      // viewport size
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
+  colorSlider.addEventListener("input", e => {
+    box.style.background = e.target.value;
+  });
 
-      // move anywhere
-      const x = progress * (vw - 120);
-      const y = Math.sin(progress * Math.PI) * (vh - 120);
+  box.addEventListener("mousedown", e => {
+    if (!initialized) {
+      const rect = box.getBoundingClientRect();
+      box.style.left = rect.left + "px";
+      box.style.top = rect.top + "px";
+      box.style.transform = "none";
+      initialized = true;
+    }
 
-      // scale
-      const scale = 0.5 + progress * 1.5;
+    isDragging = true;
+    offsetX = e.clientX - box.offsetLeft;
+    offsetY = e.clientY - box.offsetTop;
+    box.style.cursor = "grabbing";
+  });
 
-      box.style.transform =
-        `translate(${x}px, ${y}px) scale(${scale})`;
-    });
-  </script>
+  document.addEventListener("mousemove", e => {
+    if (!isDragging) return;
+
+    box.style.left = (e.clientX - offsetX) + "px";
+    box.style.top = (e.clientY - offsetY) + "px";
+  });
+
+  document.addEventListener("mouseup", () => {
+    isDragging = false;
+    box.style.cursor = "grab";
+  });
+
+  box.addEventListener("wheel", e => {
+    e.preventDefault();
+
+    size += e.deltaY < 0 ? 10 : -10;
+    size = Math.max(20, size);
+
+    box.style.width = size + "px";
+    box.style.height = size + "px";
+  }, { passive: false });
+</script>
 
 </body>
 </html>

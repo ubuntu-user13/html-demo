@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>20 Boxes</title>
+  <style>
+    .box {
+      width: 200px;
+      height: 100px;
+      background-color: red;
+      border: 1px solid black;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="container"></div>
+
+  <script>
+    const container = document.getElementById("container");
+
+    for (let i = 0; i < 20; i++) {
+      const box = document.createElement("div");
+      box.className = "box";
+      container.appendChild(box);
+    }
+  </script>
+
+</body>
+</html>

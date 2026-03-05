@@ -80,6 +80,92 @@
     }, { passive: false });
 
     box.style.cursor = "grab";
+
+    // --- Spawned mini-boxes ---
+    let mouseX = window.innerWidth / 2;
+    let mouseY = window.innerHeight / 2;
+    const minBoxes = [];
+    const MINI_SIZE = 28;
+    const SPEED = 3; // px per frame
+
+    document.addEventListener("mousemove", (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.code !== "Space") return;
+      e.preventDefault();
+
+      const mini = document.createElement("div");
+      mini.style.cssText = `
+        position: fixed;
+        width: ${MINI_SIZE}px;
+        height: ${MINI_SIZE}px;
+        background: hsl(${Math.random() * 360}, 80%, 60%);
+        pointer-events: none;
+        box-shadow: 0 0 6px rgba(0,0,0,0.5);
+      `;
+      mini.style.left = (mouseX - MINI_SIZE / 2) + "px";
+      mini.style.top  = (mouseY - MINI_SIZE / 2) + "px";
+      document.body.appendChild(mini);
+
+      // Each mini-box gets a unique stagger offset applied once it arrives
+      const stagger = {
+        x: (Math.random() - 0.5) * 40,
+        y: (Math.random() - 0.5) * 40
+      };
+
+      minBoxes.push({ el: mini, arrived: false, stagger });
+    });
+
+    function getBoxCenter() {
+      const rect = box.getBoundingClientRect();
+      return {
+        x: rect.left + rect.width  / 2,
+        y: rect.top  + rect.height / 2
+      };
+    }
+
+    function animateMinis() {
+      const center = getBoxCenter();
+
+      for (const m of minBoxes) {
+        if (m.arrived) {
+          // Follow the main box at its staggered offset
+          const tx = center.x + m.stagger.x - MINI_SIZE / 2;
+          const ty = center.y + m.stagger.y - MINI_SIZE / 2;
+          m.el.style.left = tx + "px";
+          m.el.style.top  = ty + "px";
+          continue;
+        }
+
+        const cx = parseFloat(m.el.style.left) + MINI_SIZE / 2;
+        const cy = parseFloat(m.el.style.top)  + MINI_SIZE / 2;
+
+        // Target is center + stagger so they spread out as they arrive
+        const tx = center.x + m.stagger.x;
+        const ty = center.y + m.stagger.y;
+
+        const dx = tx - cx;
+        const dy = ty - cy;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist <= SPEED) {
+          m.el.style.left = (tx - MINI_SIZE / 2) + "px";
+          m.el.style.top  = (ty - MINI_SIZE / 2) + "px";
+          m.arrived = true;
+        } else {
+          const ratio = SPEED / dist;
+          m.el.style.left = (cx + dx * ratio - MINI_SIZE / 2) + "px";
+          m.el.style.top  = (cy + dy * ratio - MINI_SIZE / 2) + "px";
+        }
+      }
+
+      requestAnimationFrame(animateMinis);
+    }
+
+    animateMinis();
   </script>
 
 </body>
